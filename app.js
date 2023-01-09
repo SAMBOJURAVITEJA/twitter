@@ -40,6 +40,9 @@ let logger = (request, response, next) => {
         response.status(401);
         response.send("Invalid JWT Token");
       } else {
+        request.username = payload;
+        console.log(payload);
+        console.log(request);
         next();
       }
     });
@@ -99,9 +102,14 @@ app.post("/login/", async (request, response) => {
   }
 });
 app.get("/user/tweets/feed/", logger, async (request, response) => {
-  let query = `select distinct(username),tweet,date_time from (user join follower 
+  let { username } = payload;
+  let matter = `select user_id from user where user.username="${username}";`;
+  let id = await DB.get(matter);
+  console.log(id);
+  let query = `select username,tweet,date_time from (user join follower 
     on user.user_id=follower.following_user_id) as t 
-    join tweet  on following_user_id=tweet.user_id 
+    join tweet on t.following_user_id=tweet.user_id
+    where user.user_id="${id.user_id}" 
     order by date_time desc 
     limit 4;`;
   let result = await DB.all(query);
@@ -126,6 +134,13 @@ app.get("/user/following/", logger, async (request, response) => {
   let query = `select name from user join 
   follower on user.user_id=follower
     .following_user_id ;`;
+  let data = await DB.all(query);
+  response.send(data);
+});
+app.get("/user/followers/", logger, async (request, response) => {
+  let query = `select name from user join 
+  follower on user.user_id=follower
+    .follower_user_id ;`;
   let data = await DB.all(query);
   response.send(data);
 });

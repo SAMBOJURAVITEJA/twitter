@@ -40,9 +40,7 @@ let logger = (request, response, next) => {
         response.status(401);
         response.send("Invalid JWT Token");
       } else {
-        request.username = payload;
-        console.log(payload);
-        console.log(request);
+        request.object = payload;
         next();
       }
     });
@@ -102,8 +100,9 @@ app.post("/login/", async (request, response) => {
   }
 });
 app.get("/user/tweets/feed/", logger, async (request, response) => {
-  let { username } = payload;
-  let matter = `select user_id from user where user.username="${username}";`;
+  let { object } = request;
+  console.log(object);
+  let matter = `select user_id from user where user.username="${object.username}";`;
   let id = await DB.get(matter);
   console.log(id);
   let query = `select username,tweet,date_time from (user join follower 

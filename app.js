@@ -26,13 +26,10 @@ let intializing = async () => {
 intializing();
 
 let logger = (request, response, next) => {
-  console.log("verifiy");
   let Token;
   let header = request.headers["authorization"];
-  console.log(header);
   if (header !== undefined) {
-    Token = [header.split(" ")][1];
-    console.log(Token);
+    Token = header.split(" ")[1];
   }
   if (Token === undefined) {
     response.status(401);
@@ -126,7 +123,8 @@ app.get("/user/tweets/feed/", logger, async (request, response) => {
   response.send(array);
 });
 app.get("/user/following/", logger, async (request, response) => {
-  let query = `select name from user join follower on user.user_id=follower
+  let query = `select name from user join 
+  follower on user.user_id=follower
     .following_user_id ;`;
   let data = await DB.all(query);
   response.send(data);
